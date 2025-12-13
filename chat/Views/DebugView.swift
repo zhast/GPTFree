@@ -52,6 +52,48 @@ struct DebugView: View {
                     .disabled(isSeeding)
 
                     Button {
+                        Task { await seedDebateConversation() }
+                    } label: {
+                        Label("Debate Chat (24 msgs)", systemImage: "arrow.left.arrow.right")
+                    }
+                    .disabled(isSeeding)
+
+                    Button {
+                        Task { await seedStarInterviewConversation() }
+                    } label: {
+                        Label("STAR Interview (18 msgs)", systemImage: "star")
+                    }
+                    .disabled(isSeeding)
+
+                    Button {
+                        Task { await seedHotTubConversation() }
+                    } label: {
+                        Label("Hot Tubs (16 msgs)", systemImage: "drop.fill")
+                    }
+                    .disabled(isSeeding)
+
+                    Button {
+                        Task { await seedLaunchVideoConversation() }
+                    } label: {
+                        Label("Launch Videos (20 msgs)", systemImage: "play.rectangle")
+                    }
+                    .disabled(isSeeding)
+
+                    Button {
+                        Task { await seedB2BSaasConversation() }
+                    } label: {
+                        Label("B2B SaaS Ideas (22 msgs)", systemImage: "building.2")
+                    }
+                    .disabled(isSeeding)
+
+                    Button {
+                        Task { await seedClutchConversation() }
+                    } label: {
+                        Label("Manual Car Clutch (24 msgs)", systemImage: "car")
+                    }
+                    .disabled(isSeeding)
+
+                    Button {
                         Task { await seedAllTestConversations() }
                     } label: {
                         Label("Seed All Test Chats", systemImage: "square.stack.3d.up")
@@ -320,12 +362,215 @@ struct DebugView: View {
         await createConversation(title: "Fitness App Development", messages: messages)
     }
 
+    private func seedDebateConversation() async {
+        isSeeding = true
+        defer { isSeeding = false }
+
+        var messages: [(String, Bool)] = []
+
+        // Phase 1: User is strongly against TypeScript
+        messages.append(("I hate TypeScript. It's just JavaScript with extra steps.", true))
+        messages.append(("I understand that view. Many developers feel the type annotations add overhead without enough benefit.", false))
+        messages.append(("Exactly! I can write JavaScript faster without fighting the type system.", true))
+        messages.append(("Speed is valid. For small scripts or prototypes, plain JS is often more productive.", false))
+        messages.append(("And the errors are cryptic. Union types, generics - who needs that complexity?", true))
+        messages.append(("TypeScript errors can be overwhelming at first. The learning curve is real.", false))
+
+        // Phase 2: AI presents counterpoints, user remains skeptical
+        messages.append(("Some people say it helps with large codebases. I don't buy it.", true))
+        messages.append(("In larger teams, types serve as documentation. New developers understand function contracts without reading implementation.", false))
+        messages.append(("Comments can do that too. Why add a whole type system?", true))
+        messages.append(("Comments can go stale. Types are verified by the compiler, so they stay accurate.", false))
+        messages.append(("I guess refactoring is slightly easier with types...", true))
+        messages.append(("That's where TypeScript shines. Renaming a property updates everywhere, and the compiler catches missed spots.", false))
+
+        // Phase 3: User starts to soften
+        messages.append(("Okay, I tried adding types to one file. The autocomplete got way better.", true))
+        messages.append(("IDE support is a major benefit. IntelliSense becomes much more accurate with type information.", false))
+        messages.append(("I also caught a bug where I was passing a string instead of a number.", true))
+        messages.append(("Runtime errors becoming compile-time errors is the core value proposition.", false))
+        messages.append(("Maybe it's not all bad. The strict mode seems excessive though.", true))
+        messages.append(("You can start with loose settings and gradually increase strictness as you're comfortable.", false))
+
+        // Phase 4: User changes position
+        messages.append(("I converted my main module to TypeScript. It actually found three bugs.", true))
+        messages.append(("That's a common experience. Hidden type mismatches surface during migration.", false))
+        messages.append(("I think I was wrong about TypeScript. The initial friction is worth it.", true))
+        messages.append(("Many developers go through that journey. The benefits compound as the codebase grows.", false))
+        messages.append(("What's the best way to learn it properly?", true))
+        messages.append(("Start with the TypeScript handbook, then practice by converting small projects. Focus on understanding inference first.", false))
+
+        await createConversation(title: "TypeScript Debate", messages: messages)
+    }
+
+    private func seedStarInterviewConversation() async {
+        isSeeding = true
+        defer { isSeeding = false }
+
+        let messages: [(String, Bool)] = [
+            ("I have a PM interview next week. How do I answer behavioral questions?", true),
+            ("Use the STAR method: Situation, Task, Action, Result. It structures your answers clearly.", false),
+            ("Can you break that down more?", true),
+            ("Situation: Set the context. Task: Your responsibility. Action: What you did specifically. Result: The outcome with metrics if possible.", false),
+            ("Give me an example for 'tell me about a conflict'?", true),
+            ("Situation: Two engineers disagreed on API design. Task: As PM, I needed to unblock the team. Action: I facilitated a meeting, had each present pros/cons, then we voted. Result: Decision made in one day, shipped on time.", false),
+            ("That's helpful. How long should answers be?", true),
+            ("Aim for 2-3 minutes. Too short lacks detail, too long loses the interviewer.", false),
+            ("What if I don't have a perfect example?", true),
+            ("Use adjacent experiences. Personal projects, school work, or volunteer roles count. Focus on transferable skills.", false),
+            ("Should I prepare stories in advance?", true),
+            ("Yes, prepare 5-7 stories that cover: leadership, conflict, failure, success, influence without authority, data-driven decision, and customer focus.", false),
+            ("What about the 'failure' question? That one scares me.", true),
+            ("Pick a real failure but focus 70% on what you learned and changed. Show growth mindset, not perfection.", false),
+            ("Any red flags to avoid?", true),
+            ("Don't blame others, don't pick trivial examples, and don't say you have no weaknesses. Authenticity matters.", false),
+            ("This is super helpful. I feel more prepared now.", true),
+            ("Good luck! Remember, they want to see how you think, not just what you did.", false)
+        ]
+
+        await createConversation(title: "STAR Interview Prep", messages: messages)
+    }
+
+    private func seedHotTubConversation() async {
+        isSeeding = true
+        defer { isSeeding = false }
+
+        let messages: [(String, Bool)] = [
+            ("Thinking about getting a hot tub. Worth it?", true),
+            ("Depends on usage. If you'll use it 3+ times weekly, usually worth it. Great for muscle recovery and stress relief.", false),
+            ("What's the maintenance like?", true),
+            ("Weekly: test water, add chemicals. Monthly: clean filters. Quarterly: drain and refill. About 20 mins/week.", false),
+            ("Chemicals sound complicated.", true),
+            ("Basic kit: chlorine or bromine, pH balancer, shock treatment. Test strips make it easy. Most people get the hang of it in a month.", false),
+            ("In-ground vs above-ground?", true),
+            ("Above-ground is cheaper, portable, easier to repair. In-ground looks nicer, adds home value, but costs 3-5x more.", false),
+            ("How much does running one cost?", true),
+            ("Electricity runs $20-50/month depending on usage and insulation quality. Good covers reduce heating costs significantly.", false),
+            ("Any health benefits actually proven?", true),
+            ("Yes - improves sleep, reduces muscle soreness, can help arthritis and anxiety. 20 mins before bed is ideal for sleep.", false),
+            ("What size should I get?", true),
+            ("For couples, 2-4 person is fine. For entertaining, 6+ person. Bigger isn't always better - more water to heat and maintain.", false),
+            ("Alright, I'm convinced. Any brand recommendations?", true),
+            ("Hot Spring, Jacuzzi, and Sundance are reliable. Avoid no-name brands. Check local dealers for service availability.", false)
+        ]
+
+        await createConversation(title: "Hot Tub Shopping", messages: messages)
+    }
+
+    private func seedLaunchVideoConversation() async {
+        isSeeding = true
+        defer { isSeeding = false }
+
+        let messages: [(String, Bool)] = [
+            ("Why do some product launch videos go viral while others flop?", true),
+            ("Usually comes down to: emotional hook in first 3 seconds, clear problem-solution narrative, and shareability factor.", false),
+            ("What makes a good hook?", true),
+            ("Pattern interrupt. Show something unexpected, ask a provocative question, or open with the transformation. Dollar Shave Club's 'our blades are great' worked because it broke expectations.", false),
+            ("What about Apple's approach? They're pretty standard.", true),
+            ("Apple earned the right to be minimal. They built anticipation over decades. For new products, you need to work harder to capture attention.", false),
+            ("How long should a launch video be?", true),
+            ("60-90 seconds for social, 2-3 minutes for landing pages. Attention drops sharply after 2 minutes unless content is exceptional.", false),
+            ("Should I show the product immediately?", true),
+            ("Depends. B2C: show it early. B2B: lead with the pain point first, then reveal solution. People need to feel the problem before caring about the fix.", false),
+            ("Music matters right?", true),
+            ("Huge impact. Upbeat builds energy, cinematic creates gravitas. Match the emotion you want. Avoid generic stock music - it signals low effort.", false),
+            ("What about testimonials in launch videos?", true),
+            ("Social proof works but keep them short. 5-10 second clips. Long testimonials kill pacing. Save detailed case studies for follow-up content.", false),
+            ("Any metrics on what works?", true),
+            ("Videos with faces get 30% more engagement. Questions in titles increase clicks. Captions are essential - 85% watch without sound.", false),
+            ("Should I hire a production company?", true),
+            ("For flagship launches, yes. For iterative content, learn to make decent videos yourself. Smartphone + good lighting + clear audio beats expensive but soulless production.", false),
+            ("This gives me a lot to think about.", true),
+            ("Start with the story you want to tell, then figure out production. Story first, polish second.", false)
+        ]
+
+        await createConversation(title: "Launch Video Strategy", messages: messages)
+    }
+
+    private func seedB2BSaasConversation() async {
+        isSeeding = true
+        defer { isSeeding = false }
+
+        let messages: [(String, Bool)] = [
+            ("Everyone talks about exciting startups. What are some boring B2B SaaS ideas that actually make money?", true),
+            ("The most profitable SaaS is often invisible. Invoice processing, compliance tracking, fleet management. Boring problems, recurring revenue.", false),
+            ("Why does boring work so well?", true),
+            ("Less competition, stickier customers, buyers care about ROI not hype. A CFO buying expense software doesn't need it to be cool.", false),
+            ("Give me some specific examples?", true),
+            ("Dental practice management, HVAC scheduling software, property management tools, church management systems. Each is a $100M+ market.", false),
+            ("Church management software? Really?", true),
+            ("Yep. Donations, member databases, event scheduling, volunteer coordination. Planning Center does $50M+ ARR. Nobody talks about it.", false),
+            ("How do you find these niches?", true),
+            ("Look for industries using spreadsheets or legacy software. Talk to people who run small businesses. Their pain points are gold.", false),
+            ("What about competition from big players?", true),
+            ("Enterprise software is bloated and expensive. SMBs get ignored. A focused tool that does one thing well beats Salesforce for a plumber.", false),
+            ("Pricing for boring SaaS?", true),
+            ("$50-500/month per seat is common. Value-based pricing works. If you save them 10 hours/month, charge for that value.", false),
+            ("How do you market something boring?", true),
+            ("Direct outreach, industry conferences, partnerships with consultants. SEO for specific pain points. 'Boring' means your customers search for solutions.", false),
+            ("Any red flags in picking a niche?", true),
+            ("Avoid dying industries, avoid niches where customers can't pay, avoid markets dominated by one free tool.", false),
+            ("What's your top boring SaaS pick right now?", true),
+            ("Compliance software for any regulated industry. Healthcare, finance, food service. Regulations only increase, never decrease.", false),
+            ("This is actually really helpful. I was chasing shiny ideas.", true),
+            ("Shiny is fun but boring pays the bills. Find a $10K problem and charge $100/month to solve it.", false)
+        ]
+
+        await createConversation(title: "Boring B2B SaaS Ideas", messages: messages)
+    }
+
+    private func seedClutchConversation() async {
+        isSeeding = true
+        defer { isSeeding = false }
+
+        let messages: [(String, Bool)] = [
+            ("I'm learning to drive manual. The clutch is confusing me.", true),
+            ("The clutch connects engine to wheels. Pressed in = disconnected. Released = connected. You control how smoothly power transfers.", false),
+            ("Why do I keep stalling?", true),
+            ("Releasing clutch too fast without enough gas. The engine needs fuel to handle the load. Think of it like a handshake - gradual meeting in the middle.", false),
+            ("What's the 'bite point'?", true),
+            ("The spot where clutch starts engaging. You'll feel the car want to move and hear RPMs drop slightly. Practice finding it without gas first.", false),
+            ("Should I use the handbrake on hills?", true),
+            ("Yes, especially while learning. Handbrake holds car, find bite point, add gas, release handbrake. Prevents rolling back.", false),
+            ("My left leg gets tired. Is that normal?", true),
+            ("At first, yes. You're using muscles differently. Don't rest your foot on the clutch while driving - causes wear and fatigue.", false),
+            ("When do I shift gears?", true),
+            ("Listen to the engine. High pitch = shift up. Lugging/struggling = shift down. Most cars: 2nd at 15mph, 3rd at 25, 4th at 35, 5th at 45+.", false),
+            ("Do I need to match revs when downshifting?", true),
+            ("For smooth driving, yes. Blip the throttle while clutch is in. For normal driving, releasing clutch slowly works too.", false),
+            ("What's heel-toe shifting?", true),
+            ("Advanced technique: brake with toe, blip gas with heel, downshift. Used in performance driving. Don't worry about it while learning.", false),
+            ("How do I start on a steep hill?", true),
+            ("More gas than usual, higher bite point. Some people use the e-brake method: engage handbrake, find bite, release brake as you add gas.", false),
+            ("Is it bad to ride the clutch in traffic?", true),
+            ("Yes, causes wear. In slow traffic, better to creep in first gear or stop completely. Avoid holding the car on a hill with clutch.", false),
+            ("How long until this feels natural?", true),
+            ("Most people feel comfortable after 10-20 hours of practice. Stick with it - muscle memory takes over and you won't think about it.", false),
+            ("Any tips for practicing?", true),
+            ("Empty parking lot, start/stop repeatedly. Practice hill starts. Don't avoid traffic - that's where you really learn. Stay calm when you stall.", false)
+        ]
+
+        await createConversation(title: "Learning Manual Transmission", messages: messages)
+    }
+
     private func seedAllTestConversations() async {
         await seedShortConversation()
-        try? await Task.sleep(for: .milliseconds(500))
+        try? await Task.sleep(for: .milliseconds(300))
         await seedLongConversation()
-        try? await Task.sleep(for: .milliseconds(500))
+        try? await Task.sleep(for: .milliseconds(300))
         await seedMultiTopicConversation()
+        try? await Task.sleep(for: .milliseconds(300))
+        await seedDebateConversation()
+        try? await Task.sleep(for: .milliseconds(300))
+        await seedStarInterviewConversation()
+        try? await Task.sleep(for: .milliseconds(300))
+        await seedHotTubConversation()
+        try? await Task.sleep(for: .milliseconds(300))
+        await seedLaunchVideoConversation()
+        try? await Task.sleep(for: .milliseconds(300))
+        await seedB2BSaasConversation()
+        try? await Task.sleep(for: .milliseconds(300))
+        await seedClutchConversation()
     }
 
     private func createConversation(title: String, messages: [(String, Bool)]) async {
