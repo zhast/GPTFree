@@ -12,40 +12,40 @@ import FoundationModels
 
 @Generable
 struct ChunkSummary {
-    @Guide(description: "1-2 sentence summary of what the user asked about and what was discussed. Be conversational, e.g. 'User asked about X and learned Y.'")
+    @Guide(description: "One sentence: what was asked and resolved. Example: 'User asked about X, learned Y.'")
     let summary: String
 
-    @Guide(description: "3-5 distinct key topics as comma-separated words. Avoid redundancy - don't include 'SwiftUI' and 'learning SwiftUI', just pick the more specific one.")
+    @Guide(description: "3-5 key topics, comma-separated. Pick specific terms only.")
     let topics: String
 
-    @Guide(description: "Participant names or roles, comma-separated (e.g., 'User, Assistant' or 'Alice, Bob')")
+    @Guide(description: "Participant names, comma-separated")
     let participants: String
 }
 
 @Generable
 struct SinglePassSummary {
-    @Guide(description: "Concise title, 3-5 words, like 'SwiftUI Navigation Help' or 'Setting Up Vapor API'. No redundancy, no ampersands.")
+    @Guide(description: "Title in 3-5 words. Example: 'SwiftUI Navigation Help'")
     let title: String
 
-    @Guide(description: "1-2 sentence summary focusing on what the user wanted and the outcome. Be conversational: 'User asked about...' or 'Discussed how to...'")
+    @Guide(description: "One sentence: what user wanted and outcome. No fluff.")
     let summary: String
 
-    @Guide(description: "3-5 distinct key topics as comma-separated words. Pick specific terms, avoid overlapping concepts.")
+    @Guide(description: "3-5 key topics, comma-separated")
     let topics: String
 
-    @Guide(description: "Participant names or roles, comma-separated")
+    @Guide(description: "Participant names, comma-separated")
     let participants: String
 }
 
 @Generable
 struct FinalMergedSummary {
-    @Guide(description: "Concise title, 3-5 words, capturing the main theme. Examples: 'Building a REST API', 'iOS App Architecture'. No redundancy.")
+    @Guide(description: "Title in 3-5 words. Example: 'Building a REST API'")
     let title: String
 
-    @Guide(description: "2-3 sentence summary synthesizing all parts. Focus on what the user wanted to accomplish and key takeaways. Be conversational, not academic.")
+    @Guide(description: "1-2 sentences max. What user accomplished. No flowery language.")
     let summary: String
 
-    @Guide(description: "4-6 distinct key topics from the entire conversation. Pick the most important, non-overlapping terms.")
+    @Guide(description: "4-6 key topics, comma-separated")
     let topics: String
 }
 
@@ -100,8 +100,7 @@ actor SummaryGenerationService {
         let snippets = extractSnippets(from: messages)
 
         let instructions = """
-            You summarize chat conversations concisely. Focus on what the user wanted and the outcome.
-            Write naturally, not formally. Avoid phrases like "This conversation covers" or "comprehensive guide".
+            Summarize chats in minimal words. State facts only. Never use: "comprehensive", "guiding stars", "journey", "delved", "explored", "tackled".
             """
 
         let prompt = """
@@ -174,8 +173,7 @@ actor SummaryGenerationService {
         let formatted = formatMessages(messages)
 
         let instructions = """
-            You summarize chat segments concisely. Focus on what was discussed and any conclusions.
-            Write naturally: "User asked about X" or "Discussed Y". Avoid formal language.
+            Summarize in one sentence. Facts only. No flowery words.
             """
 
         let prompt = """
@@ -194,9 +192,7 @@ actor SummaryGenerationService {
         }.joined(separator: "\n")
 
         let instructions = """
-            You create unified summaries from multiple parts. Synthesize, don't just concatenate.
-            Write a natural, conversational summary focusing on what the user accomplished.
-            Avoid academic language like "This comprehensive discussion covers".
+            Merge summaries into 1-2 sentences. Facts only. Never use flowery or academic language.
             """
 
         let prompt = """
