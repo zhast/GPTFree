@@ -156,7 +156,7 @@ struct ChatView: View {
             EditMessageView(
                 text: $editText,
                 onSave: {
-                    vm.updateMessage(message, newText: editText)
+                    vm.updateMessage(message, newText: editText, conversationStore: conversationStore, memoryStore: memoryStore)
                     messageToEdit = nil
                 },
                 onCancel: {

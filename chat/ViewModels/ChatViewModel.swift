@@ -321,15 +321,33 @@ class ChatViewModel: ObservableObject {
         }
     }
 
-    func updateMessage(_ message: MessageItem, newText: String) {
-        if let index = messages.firstIndex(where: { $0.id == message.id }) {
-            messages[index] = MessageItem(
-                id: message.id,
-                conversationId: message.conversationId,
-                text: newText,
-                fromUser: message.fromUser,
-                timestamp: message.timestamp
-            )
+    func updateMessage(_ message: MessageItem, newText: String, conversationStore: ConversationStore, memoryStore: MemoryStore) {
+        guard let index = messages.firstIndex(where: { $0.id == message.id }) else { return }
+
+        // Update the message text
+        messages[index] = MessageItem(
+            id: message.id,
+            conversationId: message.conversationId,
+            text: newText,
+            fromUser: message.fromUser,
+            timestamp: message.timestamp
+        )
+
+        // If it's a user message, remove all subsequent messages and regenerate
+        if message.fromUser {
+            // Remove all messages after this one
+            messages = Array(messages.prefix(index + 1))
+
+            Task {
+                try? await persistence.saveMessages(messages, for: conversationId)
+            }
+
+            // Regenerate response
+            Task {
+                await sendReply(conversationStore: conversationStore, memoryStore: memoryStore)
+            }
+        } else {
+            // For assistant messages, just save the edit
             Task {
                 try? await persistence.saveMessages(messages, for: conversationId)
             }
