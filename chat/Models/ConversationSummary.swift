@@ -15,7 +15,19 @@ struct ConversationSummary: Codable {
     var participants: [String]
     var messageCount: Int
     var chunkSummaries: [String]?
+    var originalTokenCount: Int
     let generatedAt: Date
+
+    /// Tokens used by this summary when sent to LLM (title + summary text)
+    var summaryTokenCount: Int {
+        (generatedTitle.count + summaryText.count) / 4
+    }
+
+    /// Compression ratio as percentage (0-100)
+    var compressionPercentage: Int {
+        guard originalTokenCount > 0 else { return 0 }
+        return Int((1.0 - Double(summaryTokenCount) / Double(originalTokenCount)) * 100)
+    }
 
     init(
         generatedTitle: String,
@@ -25,6 +37,7 @@ struct ConversationSummary: Codable {
         participants: [String] = ["User", "Assistant"],
         messageCount: Int = 0,
         chunkSummaries: [String]? = nil,
+        originalTokenCount: Int = 0,
         generatedAt: Date = Date()
     ) {
         self.generatedTitle = generatedTitle
@@ -34,6 +47,7 @@ struct ConversationSummary: Codable {
         self.participants = participants
         self.messageCount = messageCount
         self.chunkSummaries = chunkSummaries
+        self.originalTokenCount = originalTokenCount
         self.generatedAt = generatedAt
     }
 }

@@ -65,6 +65,11 @@ struct SummaryCard: View {
                 Text(summary.generatedTitle)
                     .font(.headline)
                 Spacer()
+                if summary.originalTokenCount > 0 {
+                    Text("\(summary.compressionPercentage)% smaller")
+                        .font(.caption)
+                        .foregroundStyle(.green)
+                }
                 Text("\(summary.messageCount) msgs")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -133,6 +138,21 @@ struct SummaryCard: View {
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }
+                    }
+                }
+
+                // Compression stats
+                if summary.originalTokenCount > 0 {
+                    HStack {
+                        Text("Compression:")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                        Text("\(summary.originalTokenCount) → \(summary.summaryTokenCount) tokens")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text("(\(summary.compressionPercentage)%)")
+                            .font(.caption)
+                            .foregroundStyle(.green)
                     }
                 }
 

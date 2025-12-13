@@ -12,10 +12,10 @@ import FoundationModels
 
 @Generable
 struct ChunkSummary {
-    @Guide(description: "One sentence: what was asked and resolved. Example: 'User asked about X, learned Y.'")
+    @Guide(description: "What was the user trying to figure out, and what did they learn or decide? Focus on intent and outcome, not facts discussed.")
     let summary: String
 
-    @Guide(description: "3-5 key topics, comma-separated. Pick specific terms only.")
+    @Guide(description: "3-5 key topics, comma-separated")
     let topics: String
 
     @Guide(description: "Participant names, comma-separated")
@@ -24,10 +24,10 @@ struct ChunkSummary {
 
 @Generable
 struct SinglePassSummary {
-    @Guide(description: "Title in 3-5 words. Example: 'SwiftUI Navigation Help'")
+    @Guide(description: "Title capturing user's goal, 3-5 words. Example: 'Learning SwiftUI Basics' or 'Evaluating Hot Tub Purchase'")
     let title: String
 
-    @Guide(description: "One sentence: what user wanted and outcome. No fluff.")
+    @Guide(description: "What the user wanted to figure out, what they learned or decided, and any preferences revealed. Focus on the user's journey, not facts.")
     let summary: String
 
     @Guide(description: "3-5 key topics, comma-separated")
@@ -39,10 +39,10 @@ struct SinglePassSummary {
 
 @Generable
 struct FinalMergedSummary {
-    @Guide(description: "Title in 3-5 words. Example: 'Building a REST API'")
+    @Guide(description: "Title capturing user's goal, 3-5 words")
     let title: String
 
-    @Guide(description: "1-2 sentences max. What user accomplished. No flowery language.")
+    @Guide(description: "What the user was trying to accomplish, what they learned or decided, and any perspective shifts. This helps personalize future responses.")
     let summary: String
 
     @Guide(description: "4-6 key topics, comma-separated")
@@ -100,11 +100,14 @@ actor SummaryGenerationService {
         let snippets = extractSnippets(from: messages)
 
         let instructions = """
-            Summarize chats in minimal words. State facts only. Never use: "comprehensive", "guiding stars", "journey", "delved", "explored", "tackled".
+            You summarize chats to help personalize future responses. Focus on understanding the user, not recapping facts.
             """
 
         let prompt = """
-            Summarize this chat. What did the user want? What was the result?
+            Summarize this chat for context in future conversations:
+            1. What was the user trying to figure out or decide?
+            2. What did they learn, conclude, or choose?
+            3. What preferences or perspectives did this reveal about them?
 
             \(formatted)
             """
@@ -113,6 +116,9 @@ actor SummaryGenerationService {
         let response = try await session.respond(to: prompt, generating: SinglePassSummary.self)
         let result = response.content
 
+        // Calculate original token count
+        let originalTokens = estimateTokens(formatted)
+
         return ConversationSummary(
             generatedTitle: result.title,
             summaryText: result.summary,
@@ -120,7 +126,8 @@ actor SummaryGenerationService {
             userMessageSnippets: snippets,
             participants: parseCommaSeparated(result.participants),
             messageCount: messages.count,
-            chunkSummaries: nil
+            chunkSummaries: nil,
+            originalTokenCount: originalTokens
         )
     }
 
@@ -158,6 +165,9 @@ actor SummaryGenerationService {
         // Deduplicate topics from final result
         let dedupedTopics = deduplicateTopics(parseCommaSeparated(finalResult.topics))
 
+        // Calculate original token count
+        let originalTokens = estimateTokens(formatMessages(messages))
+
         return ConversationSummary(
             generatedTitle: finalResult.title,
             summaryText: finalResult.summary,
@@ -165,7 +175,8 @@ actor SummaryGenerationService {
             userMessageSnippets: extractSnippets(from: messages),
             participants: Array(allParticipants),
             messageCount: messages.count,
-            chunkSummaries: chunkResults.map { $0.summary }
+            chunkSummaries: chunkResults.map { $0.summary },
+            originalTokenCount: originalTokens
         )
     }
 
@@ -173,11 +184,12 @@ actor SummaryGenerationService {
         let formatted = formatMessages(messages)
 
         let instructions = """
-            Summarize in one sentence. Facts only. No flowery words.
+            Summarize to understand the user better, not to recap facts.
             """
 
         let prompt = """
-            Summarize this part of a conversation (part \(chunkNumber) of \(totalChunks)).
+            For this conversation segment (part \(chunkNumber) of \(totalChunks)):
+            What was the user trying to figure out? What did they learn or decide?
 
             \(formatted)
             """
@@ -192,11 +204,14 @@ actor SummaryGenerationService {
         }.joined(separator: "\n")
 
         let instructions = """
-            Merge summaries into 1-2 sentences. Facts only. Never use flowery or academic language.
+            Create a summary that helps personalize future conversations with this user.
             """
 
         let prompt = """
-            Combine these conversation parts into one summary. Create a short, memorable title.
+            Combine these into one summary that captures:
+            - What the user was trying to accomplish overall
+            - Key decisions or perspective shifts they made
+            - What this reveals about their preferences
 
             \(combinedText)
             """
@@ -215,8 +230,14 @@ actor SummaryGenerationService {
             userMessageSnippets: [],
             participants: [],
             messageCount: 0,
-            chunkSummaries: nil
+            chunkSummaries: nil,
+            originalTokenCount: 0
         )
+    }
+
+    private func estimateTokens(_ text: String) -> Int {
+        // Rough estimate: ~4 characters per token
+        text.count / 4
     }
 
     private func splitIntoChunks(_ messages: [MessageItem]) -> [[MessageItem]] {
