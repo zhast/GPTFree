@@ -13,6 +13,7 @@ struct ContextUsageView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showingInfo = false
     @State private var showingMemoryView = false
+    @State private var showingRecentChatsView = false
 
     let messages: [MessageItem]
 
@@ -225,12 +226,22 @@ struct ContextUsageView: View {
                     }
                     .buttonStyle(.plain)
 
-                    LegendRow(
-                        color: .green,
-                        title: "Recent Chats",
-                        detail: "~\(Int(recentConversationsTokens)) tokens",
-                        subtitle: "\(conversationStore.recentConversations.filter { $0.summary != nil }.prefix(5).count) summaries"
-                    )
+                    Button {
+                        showingRecentChatsView = true
+                    } label: {
+                        HStack {
+                            LegendRow(
+                                color: .green,
+                                title: "Recent Chats",
+                                detail: "~\(Int(recentConversationsTokens)) tokens",
+                                subtitle: "\(conversationStore.recentConversations.filter { $0.summary != nil }.prefix(5).count) summaries"
+                            )
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    .buttonStyle(.plain)
 
                     LegendRow(
                         color: .blue,
@@ -283,6 +294,12 @@ struct ContextUsageView: View {
                 NavigationStack {
                     MemoryView()
                         .environmentObject(memoryStore)
+                }
+            }
+            .sheet(isPresented: $showingRecentChatsView) {
+                NavigationStack {
+                    RecentChatsSummaryView()
+                        .environmentObject(conversationStore)
                 }
             }
         }
