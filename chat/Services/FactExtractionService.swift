@@ -27,28 +27,184 @@ actor FactExtractionService {
     func extractFactsFromMessage(_ userMessage: String, conversationId: UUID) async throws -> [UserFact] {
         guard !userMessage.isEmpty else { return [] }
 
-        // Skip questions - they don't contain facts about the user
         let trimmed = userMessage.trimmingCharacters(in: .whitespaces)
-        if trimmed.hasSuffix("?") || trimmed.lowercased().hasPrefix("what") ||
-           trimmed.lowercased().hasPrefix("how") || trimmed.lowercased().hasPrefix("why") ||
-           trimmed.lowercased().hasPrefix("when") || trimmed.lowercased().hasPrefix("where") ||
-           trimmed.lowercased().hasPrefix("can you") || trimmed.lowercased().hasPrefix("could you") {
+        let lower = trimmed.lowercased()
+
+        // Skip questions - they don't contain facts about the user
+        if trimmed.hasSuffix("?") || lower.hasPrefix("what") ||
+           lower.hasPrefix("how") || lower.hasPrefix("why") ||
+           lower.hasPrefix("when") || lower.hasPrefix("where") ||
+           lower.hasPrefix("can you") || lower.hasPrefix("could you") {
             #if DEBUG
             print("[FactExtraction] Skipping question: \(userMessage)")
             #endif
             return []
         }
 
+        // Skip very short messages (single words, brief acknowledgments)
+        if trimmed.count < 10 {
+            #if DEBUG
+            print("[FactExtraction] Skipping very short message: \(userMessage)")
+            #endif
+            return []
+        }
+
+        // Skip common conversational filler patterns
+        let fillerPatterns = [
+            "thanks", "thank you", "ok", "okay", "got it", "i see",
+            "sounds good", "perfect", "great", "cool", "nice",
+            "sure", "yes", "no", "right", "understood", "let me", "let's",
+            "i understand", "alright", "i agree", "i'll do", "good point",
+            "also,", "wait,", "actually,", "one more", "by the way"
+        ]
+        if fillerPatterns.contains(where: { lower.hasPrefix($0) }) && trimmed.count < 40 {
+            #if DEBUG
+            print("[FactExtraction] Skipping filler: \(userMessage)")
+            #endif
+            return []
+        }
+
+        // Skip commands/requests to the AI
+        let commandPatterns = [
+            "show me", "explain", "help me", "give me", "tell me",
+            "can you show", "please explain", "please help"
+        ]
+        if commandPatterns.contains(where: { lower.hasPrefix($0) }) {
+            #if DEBUG
+            print("[FactExtraction] Skipping command: \(userMessage)")
+            #endif
+            return []
+        }
+
+        // Skip reactions about the conversation (usually start with "that's" or "that is")
+        if (lower.hasPrefix("that's") || lower.hasPrefix("that is") || lower.hasPrefix("this is")) && trimmed.count < 30 {
+            #if DEBUG
+            print("[FactExtraction] Skipping reaction: \(userMessage)")
+            #endif
+            return []
+        }
+
+        // Skip temporary states (short messages only, to allow "I'm thinking about learning Rust")
+        let shortTemporaryPatterns = [
+            "i'm confused", "i'm stuck", "i'm lost",
+            "i am confused", "i am stuck", "i am lost",
+            "i don't understand", "i don't get", "i see what",
+            "i'm a bit lost", "i'm still working", "i'm getting closer",
+            "i'm having trouble", "oh wow"
+        ]
+        if shortTemporaryPatterns.contains(where: { lower.hasPrefix($0) }) && trimmed.count < 35 {
+            #if DEBUG
+            print("[FactExtraction] Skipping temporary state: \(userMessage)")
+            #endif
+            return []
+        }
+
+        // Skip emotional reactions about the current situation (any length)
+        let emotionalPatterns = [
+            "i'm excited to try", "i'm excited about", "i'm worried this",
+            "i'm worried about", "i'm surprised", "i'm happy with this",
+            "i'm frustrated with", "i'm not sure"
+        ]
+        if emotionalPatterns.contains(where: { lower.hasPrefix($0) }) {
+            #if DEBUG
+            print("[FactExtraction] Skipping emotional reaction: \(userMessage)")
+            #endif
+            return []
+        }
+
+        // Skip "makes sense" patterns
+        if lower.contains("makes sense") || lower.contains("make sense") {
+            #if DEBUG
+            print("[FactExtraction] Skipping acknowledgment: \(userMessage)")
+            #endif
+            return []
+        }
+
+        // Skip hypotheticals (broader patterns)
+        if lower.hasPrefix("if i were") || lower.hasPrefix("if i was") ||
+           (lower.contains("i would") && lower.contains("if")) ||
+           lower.hasPrefix("i would love to") || lower.hasPrefix("i would like to") ||
+           lower.hasPrefix("i could see") || lower.hasPrefix("i might") {
+            #if DEBUG
+            print("[FactExtraction] Skipping hypothetical: \(userMessage)")
+            #endif
+            return []
+        }
+
+        // Skip quotes from others and hearsay
+        if lower.contains("said '") || lower.contains("said \"") ||
+           lower.contains("told me") || lower.hasPrefix("my friend") ||
+           lower.hasPrefix("my coworker") || lower.hasPrefix("someone") ||
+           lower.hasPrefix("i heard") {
+            #if DEBUG
+            print("[FactExtraction] Skipping quote/third-party: \(userMessage)")
+            #endif
+            return []
+        }
+
+        // Skip general statements not about the user
+        if lower.hasPrefix("people") || lower.hasPrefix("everyone") ||
+           lower.hasPrefix("most ") || lower.hasPrefix("usually") {
+            #if DEBUG
+            print("[FactExtraction] Skipping general statement: \(userMessage)")
+            #endif
+            return []
+        }
+
+        // Skip meta-conversation references
+        let metaPatterns = [
+            "going back to", "as i mentioned", "to clarify", "in other words",
+            "as i said", "like i said", "what i meant"
+        ]
+        if metaPatterns.contains(where: { lower.hasPrefix($0) }) {
+            #if DEBUG
+            print("[FactExtraction] Skipping meta-conversation: \(userMessage)")
+            #endif
+            return []
+        }
+
+        // Skip opinions about external things (not user preferences)
+        // These are statements about tech/products/code, not about the user
+        if !lower.contains("i ") && !lower.contains("my ") && !lower.contains("i'm") &&
+           (lower.contains(" is ") || lower.contains(" are ")) && trimmed.count < 40 {
+            #if DEBUG
+            print("[FactExtraction] Skipping external opinion: \(userMessage)")
+            #endif
+            return []
+        }
+
         let instructions = """
-            Extract personal facts when users share information about themselves.
+            You extract LASTING personal facts about users. Be very selective.
+            Only return hasFact=true for permanent traits, not temporary states or reactions.
+            When uncertain, return hasFact=false.
             """
 
         let prompt = """
             Message: "\(userMessage)"
 
-            If this contains a personal fact (like, dislike, preference, job, name, hobby), set hasFact=true and extract it.
-            Examples that SHOULD be extracted: "I like pizza", "I'm a teacher", "I love hiking", "My name is John", "I like hot tubs"
-            Examples that should NOT be extracted: "That's interesting", "Thanks", "OK"
+            Extract ONLY if this reveals a LASTING fact about the user such as:
+            - Identity: name, age, location, nationality
+            - Occupation: job, profession, employer
+            - Preferences: likes, dislikes, favorites (NOT opinions about this conversation)
+            - Life facts: family, pets, relationships, education
+            - Goals: what they want to learn or achieve
+            - Hobbies: activities they regularly do
+
+            Set hasFact=false for:
+            - Temporary states: "I'm confused", "I'm stuck", "I'm thinking"
+            - Reactions to conversation: "That's helpful", "Makes sense", "Thanks"
+            - Opinions about the chat: "Great explanation", "This is interesting"
+            - Hypotheticals: "If I were...", "I would..."
+            - Quotes from others: "My friend said..."
+            - Generic statements not about the user
+
+            Examples:
+            "I'm a nurse" → hasFact=true, "Works as a nurse"
+            "I love hiking" → hasFact=true, "Loves hiking"
+            "I'm confused right now" → hasFact=false
+            "Thanks for explaining" → hasFact=false
+            "That's really helpful" → hasFact=false
+            "My friend loves Python" → hasFact=false
             """
 
         let session = LanguageModelSession(instructions: instructions)
