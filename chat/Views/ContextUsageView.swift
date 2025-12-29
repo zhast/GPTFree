@@ -194,7 +194,7 @@ struct ContextUsageView: View {
                 .padding(.horizontal)
 
                 // Legend
-                VStack(spacing: 12) {
+                VStack(spacing: 8) {
                     LegendRow(
                         color: .red,
                         title: "System Prompt",
@@ -264,6 +264,8 @@ struct ContextUsageView: View {
                         subtitle: "Model output"
                     )
                 }
+                .padding(12)
+                .glassEffect(.regular, in: .rect(cornerRadius: 16))
                 .padding(.horizontal)
 
                 Spacer()

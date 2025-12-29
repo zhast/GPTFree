@@ -89,9 +89,8 @@ struct SummaryCard: View {
                                 .font(.caption2)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(Color.green.opacity(0.15))
                                 .foregroundStyle(.green)
-                                .clipShape(Capsule())
+                                .glassEffect(.regular.tint(.green.opacity(0.3)), in: .capsule)
                         }
                     }
                 }

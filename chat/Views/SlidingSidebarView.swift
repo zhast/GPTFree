@@ -133,11 +133,13 @@ struct SidebarConversationRow: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 12)
             .padding(.horizontal, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(isSelected ? Color.accentColor.opacity(0.12) : Color.clear)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .background {
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(.clear)
+                        .glassEffect(.regular.tint(Color.accentColor), in: .rect(cornerRadius: 10))
+                }
+            }
             .contextMenu {
                 Button {
                     onRename?()
