@@ -7,6 +7,8 @@
 
 import Foundation
 
+#if DEBUG
+
 /// Results structure written to JSON file for external reading
 struct FactExtractionTestRunResults: Codable {
     let timestamp: Date
@@ -507,3 +509,5 @@ fileprivate enum FactTestCases {
         TestCase(name: "Real - Personal constraint", message: "I can only work on this in the evenings because of my day job", expectedFact: "Has a day job"),
     ]
 }
+
+#endif

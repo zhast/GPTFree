@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+#if DEBUG
+
 struct DebugView: View {
     @EnvironmentObject var conversationStore: ConversationStore
     @Environment(\.dismiss) private var dismiss
@@ -661,3 +663,5 @@ struct DebugView: View {
     DebugView()
         .environmentObject(ConversationStore())
 }
+
+#endif

@@ -7,6 +7,8 @@
 
 import Foundation
 
+#if DEBUG
+
 /// Results structure written to JSON file for external reading
 struct TestRunResults: Codable {
     let timestamp: Date
@@ -506,3 +508,5 @@ enum TestCases {
         ("Empty parking lot, start/stop repeatedly. Practice hill starts. Don't avoid traffic - that's where you really learn. Stay calm when you stall.", false)
     ]
 }
+
+#endif

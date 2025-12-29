@@ -9,34 +9,37 @@ import SwiftUI
 
 @main
 struct chatApp: App {
+    #if DEBUG
     @State private var isRunningTests = false
     @State private var testType = ""
+    #endif
 
     init() {
-        // Check for automated test mode
+        #if DEBUG
+        // Check for automated test mode (DEBUG only)
         if CommandLine.arguments.contains("--run-summary-tests") {
-            isRunningTests = true
-            testType = "Summary"
+            _isRunningTests = State(initialValue: true)
+            _testType = State(initialValue: "Summary")
             Task {
                 await SummaryTestRunner.shared.runAllTests()
-                // Give time for file to write
                 try? await Task.sleep(for: .seconds(1))
                 exit(0)
             }
         } else if CommandLine.arguments.contains("--run-fact-extraction-tests") {
-            isRunningTests = true
-            testType = "Fact Extraction"
+            _isRunningTests = State(initialValue: true)
+            _testType = State(initialValue: "Fact Extraction")
             Task {
                 await FactExtractionTestRunner.shared.runAllTests()
-                // Give time for file to write
                 try? await Task.sleep(for: .seconds(1))
                 exit(0)
             }
         }
+        #endif
     }
 
     var body: some Scene {
         WindowGroup {
+            #if DEBUG
             if isRunningTests {
                 VStack {
                     ProgressView()
@@ -46,6 +49,9 @@ struct chatApp: App {
             } else {
                 MainView()
             }
+            #else
+            MainView()
+            #endif
         }
     }
 }

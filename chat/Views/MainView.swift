@@ -101,10 +101,12 @@ struct MainView: View {
             MemoryView()
                 .environmentObject(memoryStore)
         }
+        #if DEBUG
         .sheet(isPresented: $showingDebugView) {
             DebugView()
                 .environmentObject(conversationStore)
         }
+        #endif
         .task {
             await conversationStore.load()
             await memoryStore.load()
