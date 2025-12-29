@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct UserFact: Identifiable, Codable {
+struct UserFact: Identifiable, Codable, Sendable {
     let id: UUID
     var category: FactCategory
     var content: String
@@ -17,7 +17,7 @@ struct UserFact: Identifiable, Codable {
     var updatedAt: Date
     var isUserVerified: Bool
 
-    init(id: UUID = UUID(), category: FactCategory, content: String, confidence: Double = 0.8, source: FactSource = .userCreated, createdAt: Date = Date(), updatedAt: Date = Date(), isUserVerified: Bool = false) {
+    nonisolated init(id: UUID = UUID(), category: FactCategory, content: String, confidence: Double = 0.8, source: FactSource = .userCreated, createdAt: Date = Date(), updatedAt: Date = Date(), isUserVerified: Bool = false) {
         self.id = id
         self.category = category
         self.content = content

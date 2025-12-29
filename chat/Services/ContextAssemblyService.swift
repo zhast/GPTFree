@@ -150,7 +150,7 @@ class ContextAssemblyService {
             return "[Current Conversation]\n(No messages yet)"
         }
 
-        var result = "[Current Conversation]\n"
+        let result = "[Current Conversation]\n"
         let headerTokens = estimateTokens(result)
 
         // Build messages from most recent, working backwards

@@ -5,9 +5,9 @@
 //  Created by Steven Zhang on 11/13/25.
 //
 
-import SwiftUI
+import Foundation
 
-struct MessageItem: Identifiable, Codable {
+struct MessageItem: Identifiable, Codable, Sendable {
     var id: UUID = UUID()
     let conversationId: UUID
     let text: String
@@ -15,7 +15,7 @@ struct MessageItem: Identifiable, Codable {
     let timestamp: Date
 
     // Convenience initializer for creating messages in the current conversation
-    init(id: UUID = UUID(), conversationId: UUID, text: String, fromUser: Bool, timestamp: Date = Date()) {
+    nonisolated init(id: UUID = UUID(), conversationId: UUID, text: String, fromUser: Bool, timestamp: Date = Date()) {
         self.id = id
         self.conversationId = conversationId
         self.text = text

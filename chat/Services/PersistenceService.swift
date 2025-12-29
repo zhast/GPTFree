@@ -40,8 +40,12 @@ actor PersistenceService {
 
     // MARK: - Initialization
 
-    private init() {
-        // Ensure conversations directory exists
+    init() {
+        // Directory creation is deferred to first use since init can't be async
+    }
+
+    /// Ensures the conversations directory exists (called before first write)
+    private func ensureDirectoryExists() {
         try? fileManager.createDirectory(at: conversationsDirectoryURL, withIntermediateDirectories: true)
     }
 
@@ -76,6 +80,7 @@ actor PersistenceService {
     }
 
     func saveMessages(_ messages: [MessageItem], for conversationId: UUID) async throws {
+        ensureDirectoryExists()
         let data = try JSONEncoder().encode(messages)
         try data.write(to: messagesURL(for: conversationId), options: [.atomicWrite, .completeFileProtection])
     }
@@ -127,7 +132,7 @@ actor PersistenceService {
 
         // Try to decode with the new format first (in case of partial migration)
         if let messages = try? JSONDecoder().decode([MessageItem].self, from: data),
-           let firstMessage = messages.first {
+           !messages.isEmpty {
             // Already in new format
             return nil
         }

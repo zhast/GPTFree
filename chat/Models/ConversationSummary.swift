@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ConversationSummary: Codable {
+struct ConversationSummary: Codable, Sendable {
     var generatedTitle: String
     var summaryText: String
     var keyTopics: [String]
@@ -29,7 +29,7 @@ struct ConversationSummary: Codable {
         return Int((1.0 - Double(summaryTokenCount) / Double(originalTokenCount)) * 100)
     }
 
-    init(
+    nonisolated init(
         generatedTitle: String,
         summaryText: String,
         keyTopics: [String] = [],

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Conversation: Identifiable, Codable {
+struct Conversation: Identifiable, Codable, Sendable {
     let id: UUID
     var title: String
     let createdAt: Date
@@ -15,7 +15,7 @@ struct Conversation: Identifiable, Codable {
     var summary: ConversationSummary?
     var messageCount: Int
 
-    init(id: UUID = UUID(), title: String = "New Chat", createdAt: Date = Date(), updatedAt: Date = Date(), summary: ConversationSummary? = nil, messageCount: Int = 0) {
+    nonisolated init(id: UUID = UUID(), title: String = "New Chat", createdAt: Date = Date(), updatedAt: Date = Date(), summary: ConversationSummary? = nil, messageCount: Int = 0) {
         self.id = id
         self.title = title
         self.createdAt = createdAt
