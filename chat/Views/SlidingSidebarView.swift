@@ -128,14 +128,14 @@ struct SidebarConversationRow: View {
     var body: some View {
         Text(conversation.title)
             .font(.body)
-            .foregroundStyle(isSelected ? .primary : .secondary)
+            .foregroundColor(isSelected ? .primary : .secondary)
             .lineLimit(1)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 12)
             .padding(.horizontal, 12)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(isSelected ? Color.accentColor.opacity(0.12) : Color.clear)
+                    .fill(isSelected ? Color.accentColor.opacity(0.12) : Color(.secondarySystemBackground))
             )
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .contextMenu {

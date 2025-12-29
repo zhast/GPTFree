@@ -1,0 +1,15 @@
+# Test results
+SummaryTestResults.md
+fact_extraction_test_results.json
+
+# Original logo (resized version is in Assets)
+logo.png
+
+# Misc
+patterns.tex
+*.DS_Store
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
