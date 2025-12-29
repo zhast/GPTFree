@@ -76,7 +76,7 @@ struct MainView: View {
                 }
 
                 // Sliding sidebar
-                SlidingSidebarView(isShowing: $showingSidebar, showingDebugView: $showingDebugView)
+                SlidingSidebarView(isShowing: $showingSidebar)
                     .environmentObject(conversationStore)
                     .frame(width: sidebarWidth)
                     .offset(x: showingSidebar ? 0 : -sidebarWidth)

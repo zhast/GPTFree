@@ -1,0 +1,396 @@
+\documentclass[8pt,landscape,a4paper]{article}
+\usepackage[left=0.3cm,right=0.3cm,top=0.3cm,bottom=0.3cm]{geometry}
+\usepackage{multicol}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Code style
+\lstdefinestyle{swift}{
+    language=C,
+    basicstyle=\ttfamily\tiny,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    breaklines=true,
+    frame=none,
+    morekeywords={struct, var, let, func, class, import, View, body, some, private, @State, @StateObject, @Published, @Binding, ObservableObject, enum, case, switch, guard, async, await, try, init, self, UUID, Date, Bool, String, Int, VStack, HStack, List, ForEach, Button, Text, TextField, Image, ScrollView, Spacer, nil, true, false, return, if, else, for, in, Identifiable, Codable}
+}
+
+\setlength{\columnseprule}{0.3pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2pt}
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{multicols}{4}
+
+\textbf{Basic View Structure}
+\begin{lstlisting}[style=swift]
+struct ContentView: View {
+  @State private var text = ""
+  @StateObject var vm = ViewModel()
+  var body: some View {
+    VStack {
+      Text("Title")
+    }.padding()
+  }
+}
+\end{lstlisting}
+
+\vspace{3pt}
+\textbf{Models \& Enums}
+\begin{lstlisting}[style=swift]
+struct Item: Identifiable, Codable {
+  let id = UUID()
+  var name: String
+  var isCompleted = false
+}
+
+enum CellState {
+  case empty, filled, active
+}
+\end{lstlisting}
+
+\vspace{3pt}
+\textbf{ViewModel Pattern}
+\begin{lstlisting}[style=swift]
+class ViewModel: ObservableObject {
+  @Published var items: [Item] = []
+  @Published var currentState = ""
+
+  init() { loadData() }
+
+  func addItem(_ text: String) {
+    items.append(Item(name: text))
+    saveData()
+  }
+
+  func deleteItem(at offsets: IndexSet) {
+    items.remove(atOffsets: offsets)
+  }
+
+  func clearAll() {
+    items.removeAll()
+  }
+}
+\end{lstlisting}
+
+\vspace{3pt}
+\textbf{List with Add/Delete}
+\begin{lstlisting}[style=swift]
+List {
+  ForEach($items) { $item in
+    HStack {
+      Text(item.name)
+      Spacer()
+      Button {
+        item.isCompleted.toggle()
+      } label: {
+        Image(systemName: item.isCompleted ?
+          "checkmark.circle.fill" : "circle")
+      }
+    }
+  }
+  .onDelete(perform: deleteItems)
+}
+
+// Add new item section
+HStack {
+  TextField("Enter text", text: $newText)
+    .textFieldStyle(.roundedBorder)
+    .onSubmit { addItem() }
+
+  Button(action: addItem) {
+    Image(systemName: "plus.circle.fill")
+  }
+  .disabled(newText.isEmpty)
+}
+\end{lstlisting}
+
+\columnbreak
+
+\textbf{Grid Pattern (3x3)}
+\begin{lstlisting}[style=swift]
+@State var grid: [[CellState]] = Array(
+  repeating: Array(repeating: .empty,
+    count: 3), count: 3)
+
+VStack(spacing: 5) {
+  ForEach(0..<3) { row in
+    HStack(spacing: 5) {
+      ForEach(0..<3) { col in
+        Button {
+          cellTapped(row: row, col: col)
+        } label: {
+          Text(cellText(grid[row][col]))
+            .frame(width: 80, height: 80)
+            .background(Color.gray.opacity(0.3))
+            .cornerRadius(10)
+        }
+        .disabled(grid[row][col] != .empty)
+      }
+    }
+  }
+}
+
+func cellTapped(row: Int, col: Int) {
+  guard grid[row][col] == .empty else {
+    return
+  }
+  grid[row][col] = currentPlayer
+  checkWinner()
+  switchPlayer()
+}
+\end{lstlisting}
+
+\vspace{3pt}
+\textbf{Parent-Child Binding}
+\begin{lstlisting}[style=swift]
+// Parent View
+struct ParentView: View {
+  @State var items: [Item] = []
+
+  var body: some View {
+    List {
+      ForEach($items) { $item in
+        ChildRowView(item: $item)
+      }
+    }
+  }
+}
+
+// Child View with Binding
+struct ChildRowView: View {
+  @Binding var item: Item
+
+  var body: some View {
+    HStack {
+      Text(item.name)
+        .strikethrough(item.isCompleted)
+      Spacer()
+      Button {
+        item.isCompleted.toggle()
+      } label: {
+        Image(systemName: "checkmark")
+      }
+    }
+  }
+}
+\end{lstlisting}
+
+\vspace{3pt}
+\textbf{Async/Await Pattern}
+\begin{lstlisting}[style=swift]
+@State var isLoading = false
+@State var data = ""
+
+Button("Load Data") {
+  Task {
+    await loadData()
+  }
+}
+
+func loadData() async {
+  isLoading = true
+
+  // Simulate network call
+  let result = await fetchFromAPI()
+
+  await MainActor.run {
+    self.data = result
+    self.isLoading = false
+  }
+}
+\end{lstlisting}
+
+\columnbreak
+
+\textbf{Alert Dialog}
+\begin{lstlisting}[style=swift]
+@State private var showAlert = false
+
+.alert("Title", isPresented: $showAlert) {
+  Button("OK") { }
+  Button("Cancel", role: .cancel) { }
+} message: {
+  Text("Alert message here")
+}
+\end{lstlisting}
+
+\vspace{3pt}
+\textbf{Sheet Presentation}
+\begin{lstlisting}[style=swift]
+@State private var showSheet = false
+
+.sheet(isPresented: $showSheet) {
+  SheetView()
+    .presentationDetents([.medium, .large])
+}
+\end{lstlisting}
+
+\vspace{3pt}
+\textbf{ScrollView with Auto-scroll}
+\begin{lstlisting}[style=swift]
+ScrollViewReader { proxy in
+  ScrollView {
+    VStack {
+      ForEach(messages) { msg in
+        MessageView(msg)
+          .id(msg.id)
+      }
+    }
+  }
+  .onChange(of: messages) { _, _ in
+    if let last = messages.last {
+      withAnimation {
+        proxy.scrollTo(last.id,
+          anchor: .bottom)
+      }
+    }
+  }
+}
+\end{lstlisting}
+
+\vspace{3pt}
+\textbf{JSON Persistence}
+\begin{lstlisting}[style=swift]
+// Save to JSON
+func saveData() {
+  let url = getDocumentsDirectory()
+    .appendingPathComponent("data.json")
+
+  if let encoded = try? JSONEncoder()
+      .encode(items) {
+    try? encoded.write(to: url)
+  }
+}
+
+// Load from JSON
+func loadData() {
+  let url = getDocumentsDirectory()
+    .appendingPathComponent("data.json")
+
+  if let data = try? Data(contentsOf: url),
+     let decoded = try? JSONDecoder()
+       .decode([Item].self, from: data) {
+    items = decoded
+  }
+}
+
+// Helper
+func getDocumentsDirectory() -> URL {
+  FileManager.default.urls(
+    for: .documentDirectory,
+    in: .userDomainMask)[0]
+}
+\end{lstlisting}
+
+\vspace{3pt}
+\textbf{UserDefaults / AppStorage}
+\begin{lstlisting}[style=swift]
+@AppStorage("username") var username = ""
+@AppStorage("isDarkMode") var isDark = false
+@AppStorage("score") var score = 0
+\end{lstlisting}
+
+\columnbreak
+
+\textbf{Computed Properties}
+\begin{lstlisting}[style=swift]
+var completedCount: Int {
+  items.filter { $0.isCompleted }.count
+}
+
+var progressPercentage: Double {
+  guard !items.isEmpty else { return 0 }
+  return Double(completedCount) /
+         Double(items.count) * 100
+}
+
+var statusText: String {
+  "\(completedCount) of \(items.count) done"
+}
+\end{lstlisting}
+
+\vspace{3pt}
+\textbf{Common View Modifiers}
+\begin{lstlisting}[style=swift]
+Text("Hello")
+  .font(.title)
+  .fontWeight(.bold)
+  .foregroundColor(.blue)
+  .padding()
+  .background(Color.gray.opacity(0.2))
+  .cornerRadius(10)
+  .shadow(radius: 5)
+
+Button("Tap") { }
+  .buttonStyle(.borderedProminent)
+  .disabled(isDisabled)
+
+Image(systemName: "star.fill")
+  .resizable()
+  .scaledToFit()
+  .frame(width: 50, height: 50)
+
+TextField("", text: $text)
+  .textFieldStyle(.roundedBorder)
+  .autocorrectionDisabled()
+\end{lstlisting}
+
+\vspace{3pt}
+\textbf{ForEach with Index}
+\begin{lstlisting}[style=swift]
+ForEach(Array(items.enumerated()),
+  id: \.offset) { index, item in
+    HStack {
+      Text("\(index + 1).")
+      Text(item.name)
+    }
+}
+\end{lstlisting}
+
+\vspace{3pt}
+\textbf{Toggle \& Picker}
+\begin{lstlisting}[style=swift]
+Toggle("Dark Mode", isOn: $isDarkMode)
+
+Picker("Choose", selection: $selected) {
+  ForEach(options) { option in
+    Text(option.name).tag(option)
+  }
+}
+.pickerStyle(.segmented)
+\end{lstlisting}
+
+\vspace{3pt}
+\textbf{Navigation}
+\begin{lstlisting}[style=swift]
+NavigationStack {
+  List(items) { item in
+    NavigationLink(destination:
+      DetailView(item: item)) {
+        Text(item.name)
+    }
+  }
+  .navigationTitle("Items")
+}
+\end{lstlisting}
+
+\vspace{3pt}
+\textbf{Gestures \& Swipe Actions}
+\begin{lstlisting}[style=swift]
+.onTapGesture { handleTap() }
+.onLongPressGesture { handleLongPress() }
+
+.swipeActions {
+  Button("Delete", role: .destructive) {
+    deleteItem()
+  }
+}
+\end{lstlisting}
+
+\end{multicols}
+\end{document}

@@ -10,7 +10,6 @@ import FoundationModels
 
 struct SlidingSidebarView: View {
     @Binding var isShowing: Bool
-    @Binding var showingDebugView: Bool
     @EnvironmentObject var conversationStore: ConversationStore
     @State private var conversationToRename: Conversation?
     @State private var renameText: String = ""
@@ -72,20 +71,6 @@ struct SlidingSidebarView: View {
             .contentMargins(.trailing, 4)
 
             Spacer()
-
-            // Debug button (only in DEBUG builds)
-            #if DEBUG
-            Button {
-                showingDebugView = true
-                isShowing = false
-            } label: {
-                Label("Debug Menu", systemImage: "ant")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .buttonStyle(.bordered)
-            .padding(.horizontal, 16)
-            .padding(.bottom, 16)
-            #endif
         }
         .clipped()
         .background(.ultraThinMaterial)
@@ -202,7 +187,7 @@ struct RenameConversationView: View {
 }
 
 #Preview {
-    SlidingSidebarView(isShowing: .constant(true), showingDebugView: .constant(false))
+    SlidingSidebarView(isShowing: .constant(true))
         .environmentObject(ConversationStore())
         .frame(width: 300)
 }
