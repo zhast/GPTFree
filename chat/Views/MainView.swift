@@ -106,6 +106,9 @@ struct MainView: View {
             DebugView()
                 .environmentObject(conversationStore)
         }
+        .onShake {
+            showingDebugView = true
+        }
         #endif
         .task {
             await conversationStore.load()
