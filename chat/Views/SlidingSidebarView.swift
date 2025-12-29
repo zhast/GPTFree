@@ -135,7 +135,7 @@ struct SidebarConversationRow: View {
             .padding(.horizontal, 12)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(isSelected ? Color.accentColor.opacity(0.12) : Color(.secondarySystemBackground))
+                    .fill(isSelected ? Color.accentColor.opacity(0.12) : Color.clear)
             )
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .contextMenu {
@@ -156,6 +156,13 @@ struct SidebarConversationRow: View {
                 } label: {
                     Label("Delete", systemImage: "trash")
                 }
+            } preview: {
+                Text(conversation.title)
+                    .font(.body)
+                    .lineLimit(1)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 12)
+                    .background(Color(.systemBackground))
             }
     }
 }
