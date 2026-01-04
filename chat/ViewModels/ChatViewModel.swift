@@ -315,7 +315,11 @@ class ChatViewModel: ObservableObject {
     // MARK: - Edit & Delete Messages
 
     func deleteMessage(_ message: MessageItem) {
-        messages.removeAll { $0.id == message.id }
+        guard let index = messages.firstIndex(where: { $0.id == message.id }) else { return }
+
+        // Remove this message and all subsequent messages
+        messages = Array(messages.prefix(index))
+
         Task {
             try? await persistence.saveMessages(messages, for: conversationId)
         }
