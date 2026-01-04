@@ -126,8 +126,9 @@ class ConversationStore: ObservableObject {
     func updateSummary(_ summary: ConversationSummary, for conversationId: UUID) {
         if let index = conversations.firstIndex(where: { $0.id == conversationId }) {
             conversations[index].summary = summary
-            // Also update title from summary if still default
-            if conversations[index].title == "New Chat" {
+            // Always use the summary's title - it's generated with more context
+            // and uses structured output for better quality than quick title generation
+            if !summary.generatedTitle.isEmpty {
                 conversations[index].title = summary.generatedTitle
             }
             Task {
