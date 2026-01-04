@@ -5,6 +5,9 @@ fact_extraction_test_results.json
 # Original logo (resized version is in Assets)
 logo.png
 
+# Original screenshots (resized versions in screenshots/)
+IMG_*.PNG
+
 # Misc
 patterns.tex
 *.DS_Store
