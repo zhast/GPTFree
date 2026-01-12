@@ -112,6 +112,28 @@ class ChatViewModel: ObservableObject {
         isResponding = true
         defer { isResponding = false }
 
+        let availability = AppleIntelligenceAvailability.effectiveAvailability(system: SystemLanguageModel.default.availability)
+        guard case .available = availability else {
+            let errorText: String
+            switch availability {
+            case .unavailable(.deviceNotEligible):
+                errorText = "This device can’t use Apple Intelligence, so I can’t generate replies."
+            case .unavailable(.appleIntelligenceNotEnabled):
+                errorText = "Apple Intelligence is turned off. Turn it on in Settings to use chat."
+            case .unavailable(.modelNotReady):
+                errorText = "Apple Intelligence is still downloading or preparing. Try again in a few minutes."
+            case .unavailable:
+                errorText = "Apple Intelligence isn’t available right now."
+            default:
+                errorText = "Apple Intelligence isn’t available right now."
+            }
+
+            let aiMessage = MessageItem(conversationId: conversationId, text: errorText, fromUser: false)
+            messages.append(aiMessage)
+            await saveAndUpdateConversation(conversationStore: conversationStore)
+            return
+        }
+
         // Build the 4-layer context prompt
         let prompt = assembleContext(
             conversation: conversationStore.currentConversation,

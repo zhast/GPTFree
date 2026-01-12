@@ -54,6 +54,17 @@ struct FinalMergedSummary {
 actor SummaryGenerationService {
     static let shared = SummaryGenerationService()
 
+    enum SummaryGenerationError: LocalizedError {
+        case modelUnavailable(SystemLanguageModel.Availability)
+
+        var errorDescription: String? {
+            switch self {
+            case .modelUnavailable:
+                return "Apple Intelligence model is unavailable."
+            }
+        }
+    }
+
     private let chunkSize = 20
     private let maxChunks = 10
 
@@ -65,6 +76,11 @@ actor SummaryGenerationService {
     func generateSummary(from messages: [MessageItem]) async throws -> ConversationSummary {
         guard !messages.isEmpty else {
             return emptySummary()
+        }
+
+        let availability = AppleIntelligenceAvailability.effectiveAvailability(system: SystemLanguageModel.default.availability)
+        guard case .available = availability else {
+            throw SummaryGenerationError.modelUnavailable(availability)
         }
 
         #if DEBUG

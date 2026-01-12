@@ -16,3 +16,4 @@ patterns.tex
 xcuserdata/
 *.xcuserstate
 DerivedData/
+.derivedData/

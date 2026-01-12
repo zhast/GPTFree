@@ -47,10 +47,14 @@ struct chatApp: App {
                         .padding()
                 }
             } else {
-                MainView()
+                GenerativeAvailabilityGateView {
+                    MainView()
+                }
             }
             #else
-            MainView()
+            GenerativeAvailabilityGateView {
+                MainView()
+            }
             #endif
         }
     }

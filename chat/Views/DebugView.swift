@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FoundationModels
 
 #if DEBUG
 
@@ -17,6 +18,9 @@ struct DebugView: View {
     @State private var isSummarizing = false
     @State private var summaryResults: [SummaryResult] = []
     @State private var errorMessage: String?
+    @State private var showingAvailabilityGatePreview = false
+
+    @AppStorage(AppleIntelligenceAvailability.overrideDefaultsKey) private var availabilityOverrideRaw = AppleIntelligenceAvailabilityOverride.system.rawValue
 
     struct SummaryResult: Identifiable {
         let id = UUID()
@@ -30,6 +34,53 @@ struct DebugView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section("Apple Intelligence") {
+                    let systemAvailability = SystemLanguageModel.default.availability
+                    let effectiveAvailability = AppleIntelligenceAvailability.effectiveAvailability(system: systemAvailability)
+
+                    LabeledContent("System", value: AppleIntelligenceAvailability.description(systemAvailability))
+                    LabeledContent("Effective", value: AppleIntelligenceAvailability.description(effectiveAvailability))
+
+                    Picker("Override", selection: $availabilityOverrideRaw) {
+                        ForEach(AppleIntelligenceAvailabilityOverride.allCases) { override in
+                            Text(override.title).tag(override.rawValue)
+                        }
+                    }
+
+                    Button {
+                        showingAvailabilityGatePreview = true
+                    } label: {
+                        Label("Preview Availability Screen", systemImage: "sparkles")
+                    }
+
+                    Button {
+                        availabilityOverrideRaw = AppleIntelligenceAvailabilityOverride.deviceNotEligible.rawValue
+                        showingAvailabilityGatePreview = true
+                    } label: {
+                        Label("Preview: Device Not Supported", systemImage: "iphone.slash")
+                    }
+
+                    Button {
+                        availabilityOverrideRaw = AppleIntelligenceAvailabilityOverride.appleIntelligenceNotEnabled.rawValue
+                        showingAvailabilityGatePreview = true
+                    } label: {
+                        Label("Preview: Apple Intelligence Off", systemImage: "sparkles")
+                    }
+
+                    Button {
+                        availabilityOverrideRaw = AppleIntelligenceAvailabilityOverride.modelNotReady.rawValue
+                        showingAvailabilityGatePreview = true
+                    } label: {
+                        Label("Preview: Model Not Ready", systemImage: "icloud.and.arrow.down")
+                    }
+
+                    Button {
+                        availabilityOverrideRaw = AppleIntelligenceAvailabilityOverride.system.rawValue
+                    } label: {
+                        Label("Reset Override", systemImage: "arrow.counterclockwise")
+                    }
+                }
+
                 // Seed Section
                 Section("Seed Test Conversations") {
                     Button {
@@ -219,6 +270,48 @@ struct DebugView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") { dismiss() }
                 }
+            }
+        }
+        .sheet(isPresented: $showingAvailabilityGatePreview) {
+            AvailabilityGatePreview()
+        }
+    }
+
+    private struct AvailabilityGatePreview: View {
+        @Environment(\.dismiss) private var dismiss
+        @AppStorage(AppleIntelligenceAvailability.overrideDefaultsKey) private var availabilityOverrideRaw = AppleIntelligenceAvailabilityOverride.system.rawValue
+
+        var body: some View {
+            GenerativeAvailabilityGateView {
+                ContentUnavailableView {
+                    Label("App Content Placeholder", systemImage: "checkmark.seal")
+                } description: {
+                    Text("This is what you’d see when Apple Intelligence is available.")
+                }
+                .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .safeAreaInset(edge: .top) {
+                HStack(spacing: 10) {
+                    Picker("Override", selection: $availabilityOverrideRaw) {
+                        ForEach(AppleIntelligenceAvailabilityOverride.allCases) { override in
+                            Text(override.title).tag(override.rawValue)
+                        }
+                    }
+                    .labelsHidden()
+
+                    Spacer()
+
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .buttonStyle(.glassProminent)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .padding(.horizontal, 16)
+                .padding(.top, 6)
             }
         }
     }
