@@ -78,7 +78,9 @@ actor SummaryGenerationService {
             return emptySummary()
         }
 
-        let availability = AppleIntelligenceAvailability.effectiveAvailability(system: SystemLanguageModel.default.availability)
+        let availability = await MainActor.run { @MainActor in
+            AppleIntelligenceAvailability.effectiveAvailability(system: SystemLanguageModel.default.availability)
+        }
         guard case .available = availability else {
             throw SummaryGenerationError.modelUnavailable(availability)
         }

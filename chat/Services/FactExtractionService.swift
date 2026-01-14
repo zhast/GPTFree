@@ -27,7 +27,9 @@ actor FactExtractionService {
     func extractFactsFromMessage(_ userMessage: String, conversationId: UUID) async throws -> [UserFact] {
         guard !userMessage.isEmpty else { return [] }
 
-        let availability = AppleIntelligenceAvailability.effectiveAvailability(system: SystemLanguageModel.default.availability)
+        let availability = await MainActor.run { @MainActor in
+            AppleIntelligenceAvailability.effectiveAvailability(system: SystemLanguageModel.default.availability)
+        }
         guard case .available = availability else {
             #if DEBUG
             print("[FactExtraction] Skipping (model unavailable): \(availability)")
