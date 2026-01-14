@@ -49,9 +49,11 @@ class ConversationStore: ObservableObject {
             // Sort by most recent
             conversations.sort { $0.updatedAt > $1.updatedAt }
 
-            // Select most recent if none selected
-            if currentConversationId == nil, let first = conversations.first {
+            // Select most recent, or create new conversation for first-time users
+            if let first = conversations.first {
                 currentConversationId = first.id
+            } else {
+                _ = createNewConversation()
             }
         } catch {
             print("Failed to load conversations: \(error)")
