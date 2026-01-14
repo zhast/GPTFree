@@ -281,7 +281,7 @@ struct ContextUsageView: View {
                         Image(systemName: "info.circle")
                     }
                 }
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
                         dismiss()
                     }
