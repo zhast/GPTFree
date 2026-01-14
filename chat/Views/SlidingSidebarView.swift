@@ -24,7 +24,7 @@ struct SlidingSidebarView: View {
                 Spacer()
 
                 Button {
-                    _ = conversationStore.createNewConversation()
+                    _ = conversationStore.createNewConversation(isManual: true)
                 } label: {
                     Image(systemName: "plus")
                         .frame(width: 18, height: 27)

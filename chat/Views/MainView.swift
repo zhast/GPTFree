@@ -52,7 +52,7 @@ struct MainView: View {
                                 Text("Tap the menu or swipe to select a chat.")
                             } actions: {
                                 Button("New Chat") {
-                                    _ = conversationStore.createNewConversation()
+                                    _ = conversationStore.createNewConversation(isManual: true)
                                 }
                             }
 

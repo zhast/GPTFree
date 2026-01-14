@@ -7,12 +7,14 @@
 
 import SwiftUI
 import Combine
+import StoreKit
 
 @MainActor
 class ConversationStore: ObservableObject {
     @Published var conversations: [Conversation] = []
     @Published var currentConversationId: UUID?
     @Published var isLoading: Bool = false
+    @AppStorage("hasRequestedReview") private var hasRequestedReview = false
 
     private let persistence = PersistenceService.shared
 
@@ -62,7 +64,7 @@ class ConversationStore: ObservableObject {
 
     // MARK: - CRUD Operations
 
-    func createNewConversation() -> Conversation {
+    func createNewConversation(isManual: Bool = false) -> Conversation {
         let conversation = Conversation()
         conversations.insert(conversation, at: 0)
         currentConversationId = conversation.id
@@ -71,7 +73,22 @@ class ConversationStore: ObservableObject {
             try? await persistence.saveConversationsIndex(conversations)
         }
 
+        // Request review on first manual chat creation
+        if isManual && !hasRequestedReview {
+            hasRequestedReview = true
+            requestReview()
+        }
+
         return conversation
+    }
+
+    private func requestReview() {
+        guard let scene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first(where: { $0.activationState == .foregroundActive })
+        else { return }
+
+        SKStoreReviewController.requestReview(in: scene)
     }
 
     func selectConversation(_ id: UUID) {

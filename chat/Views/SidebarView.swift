@@ -37,7 +37,7 @@ struct SidebarView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    _ = conversationStore.createNewConversation()
+                    _ = conversationStore.createNewConversation(isManual: true)
                 } label: {
                     Label("New Chat", systemImage: "square.and.pencil")
                 }
